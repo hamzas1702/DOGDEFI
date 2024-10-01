@@ -6,7 +6,7 @@ import { FaCheck } from "react-icons/fa";
 import PumpCard from '../components/PumpCard';
 import { useNavigate } from 'react-router-dom'; 
 import { ethers } from 'ethers'; // Use ES module syntax for ethers
-import {abi} from '../assets/utility/abi'; // Ensure you have a proper export for your ABI
+import { abi } from '../assets/utility/abi'; // Ensure your ABI is properly exported from this path
 
 const Dashboard: React.FC = () => {
   const [toggleAnimations, setToggleAnimations] = useState(false);
@@ -16,47 +16,38 @@ const Dashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate(); 
 
-
   useEffect(() => {
     const fetchMemeTokens = async () => {
-        try {
-            // Set up the RPC provider (or switch to window.ethereum for MetaMask)
-            const RPC = "http://127.0.0.1:8545";  // Hardhat local RPC
-            const provider = new ethers.JsonRpcProvider(RPC);
+      try {
+      
+        const provider = new ethers.JsonRpcProvider("https://site1.moralis-nodes.com/eth/4439963949d341ca8f99cab64b8dab55");
 
+        console.log(provider)
+        const contract = new ethers.Contract("0x81ED8e0325B17A266B2aF225570679cfd635d0bb", abi, provider);
 
-            console.log(provider);
+        const memeTokensCount = await contract.getMemeTokenCount();
+        console.log(memeTokensCount);
 
-            // Define the contract address and ABI
-            const contractAddress = import.meta.env.REACT_APP_CONTRACT_ADDRESS || "0x81ed8e0325b17a266b2af225570679cfd635d0bb";
-            const contract = new ethers.Contract(contractAddress, abi, provider);
-
-            console.log("Contract:", contract);
-
-            // Call the getAllMemeTokens function from the contract
-            const memeTokens = await contract.getAllMemeTokens();
-            console.log("Meme Tokens:", memeTokens);
-
-            // Map and format the tokens data
-            setCards(
-                memeTokens.map((token: any) => ({
-                    name: token.name,
-                    symbol: token.symbol,
-                    description: token.description,
-                    tokenImageUrl: token.tokenImageUrl,
-                    fundingRaised: ethers.formatUnits(token.fundingRaised, 'ether'), // Convert wei to ether
-                    tokenAddress: token.tokenAddress,
-                    creatorAddress: token.creatorAddress,
-                }))
-            );
-        } catch (error) {
-            console.error('Error fetching meme tokens:', error);
-        }
+        // setCards(
+        //   memeTokens.map(token => ({
+        //     name: token.name,
+        //     symbol: token.symbol,
+        //     description: token.description,
+        //     tokenImageUrl: token.tokenImageUrl,
+        //     fundingRaised: ethers.formatUnits(token.fundingRaised, 'ether'), // Format the fundingRaised from Wei to Ether
+        //     tokenAddress: token.tokenAddress,
+        //     creatorAddress: token.creatorAddress,
+        //   }))
+        // );
+      } catch (error) {
+        console.error('Error fetching meme tokens count:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    // Fetch meme tokens when the component mounts
     fetchMemeTokens();
-}, []); // Empty dependency array to run on mount only
+  }, []);
 
   const handleSearch = () => {
     console.log('Searching for:', searchTerm);
@@ -98,19 +89,19 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-          {/* Add PumpCard components here dynamically based on the cards state */}
-          { cards.map((card)=>(
-            <PumpCard
-              ticker='$MOODOGG'
-              name="Moo Dogg"
-              description='Tiny Dog, Big Drama: Meet Moo Dogg, our tiny, white Chihuahua known for her dramatic and adorable crying face'
-              image='https://via.placeholder.com/40'
-              marketcap={1080456}
-              replies={47}
-              time='1h ago'
-              link='/'
-            />
-          ))}
+          {/* {cards.map((card) => (
+            // <PumpCard
+            //   key={card.tokenAddress}
+            //   ticker={card.symbol}
+            //   name={card.name}
+            //   description={card.description}
+            //   image={card.tokenImageUrl}
+            //   marketcap={parseFloat(card.fundingRaised)}
+            //   replies={47}
+            //   time='1h ago'
+            //   link='/'
+            // />
+          ))} */}
         </div>
       </div>
     </Layout>
