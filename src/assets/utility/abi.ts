@@ -1,6 +1,5 @@
-import { InterfaceAbi } from "ethers"
 
-export const abi: InterfaceAbi = [
+export const abi = [
   {
     "inputs": [],
     "name": "INITIAL_PRICE",

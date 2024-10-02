@@ -22,7 +22,7 @@ const NewCoin = () => {
 
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
-        const contractAddress = "0x81ED8e0325B17A266B2aF225570679cfd635d0bb";
+        const contractAddress = "0xF48883F2ae4C4bf4654f45997fE47D73daA4da07";
         const contract = new ethers.Contract(contractAddress, abi, signer);
 
         console.log("Got the Contract:" ,contract);
@@ -47,7 +47,7 @@ const NewCoin = () => {
     
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
-        const contractAddress = "0x81ED8e0325B17A266B2aF225570679cfd635d0bb";
+        const contractAddress = "0x093D305366218D6d09bA10448922F10814b031dd";
         const contract = new ethers.Contract(contractAddress, abi, signer);
     
         try {

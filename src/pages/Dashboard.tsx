@@ -5,8 +5,16 @@ import { RxCross2 } from "react-icons/rx";
 import { FaCheck } from "react-icons/fa";
 import PumpCard from '../components/PumpCard';
 import { useNavigate } from 'react-router-dom'; 
-import { ethers } from 'ethers'; // Use ES module syntax for ethers
+import { ethers } from "ethers"; // Use ES module syntax for ethers
 import { abi } from '../assets/utility/abi'; // Ensure your ABI is properly exported from this path
+
+import { Interface } from 'ethers';
+
+import Moralis from 'moralis';
+
+Moralis.start({
+  apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjNkYzhlYWU5LTI0NDItNDc3NC04OThiLWNhMGZkMjRhZTkzOSIsIm9yZ0lkIjoiNDA5ODk0IiwidXNlcklkIjoiNDIxMjEzIiwidHlwZUlkIjoiMjQ0ZmYwMTgtZTQ4Mi00NGUwLWE5M2MtY2U5YWNhZjFmNjc4IiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3Mjc2MzMwMzYsImV4cCI6NDg4MzM5MzAzNn0.OnzWiiu-LydqNMBP3_rSZL9FCnvMZWx8GgtPFuLBPxk',
+});
 
 const Dashboard: React.FC = () => {
   const [toggleAnimations, setToggleAnimations] = useState(false);
@@ -14,33 +22,78 @@ const Dashboard: React.FC = () => {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [decodedTransactions, setDecodedTransactions] = useState<any[]>([]);
   const navigate = useNavigate(); 
 
+  const fetchContractTransactions = async (contractAddress: string) => {
+  const decodedTransactions: any = [];
+  try {
+    const response = await Moralis.EvmApi.transaction.getWalletTransactions({
+      address: contractAddress,
+      chain: '11155111',
+    });
+    
+    console.log("Response from API:", response);
+
+    const transactions = response.result;
+
+    if (!transactions || transactions.length === 0) {
+      console.log('No transactions found for this contract.');
+      return [];
+    }
+
+    const contractInterface = new Interface(abi);
+
+    const transactionPromises = transactions.map(async (tx) => {
+      const transactionHash = tx.hash;
+      console.log("Decoding transaction with hash: ", transactionHash);
+
+      const transactionDetails = await Moralis.EvmApi.transaction.getTransaction({
+        chain: "11155111",
+        transactionHash: transactionHash
+      });
+
+      if (transactionDetails && transactionDetails.result) {
+        const inputData = transactionDetails.jsonResponse.input;
+
+        if (!inputData) {
+          console.log(`No input data found for transaction ${transactionHash}`);
+          return;
+        }
+
+        try {
+          const decodedData = contractInterface.parseTransaction({ data: inputData });
+          console.log('Decoded data:', decodedData.args);
+          decodedTransactions.push({ decodedData: decodedData.args });
+        } catch (decodeError) {
+          console.error(`Error decoding data for transaction ${transactionHash} with input ${inputData}:`, decodeError);
+        }
+      }
+    });
+
+    await Promise.all(transactionPromises);
+    setDecodedTransactions(decodedTransactions);
+    return decodedTransactions;
+  } catch (error) {
+    console.error('Error fetching contract transactions:', error);
+    return [];
+  }
+};
+
+  useEffect(()=>{
+    console.log("Decoded Transactions changed:", decodedTransactions);
+  }, [decodedTransactions]);
+
+  
   useEffect(() => {
     const fetchMemeTokens = async () => {
       try {
-      
-        const provider = new ethers.JsonRpcProvider("https://site1.moralis-nodes.com/eth/4439963949d341ca8f99cab64b8dab55");
 
-        console.log(provider)
-        const contract = new ethers.Contract("0x81ED8e0325B17A266B2aF225570679cfd635d0bb", abi, provider);
-
-        const memeTokensCount = await contract.getMemeTokenCount();
-        console.log(memeTokensCount);
-
-        // setCards(
-        //   memeTokens.map(token => ({
-        //     name: token.name,
-        //     symbol: token.symbol,
-        //     description: token.description,
-        //     tokenImageUrl: token.tokenImageUrl,
-        //     fundingRaised: ethers.formatUnits(token.fundingRaised, 'ether'), // Format the fundingRaised from Wei to Ether
-        //     tokenAddress: token.tokenAddress,
-        //     creatorAddress: token.creatorAddress,
-        //   }))
-        // );
+        fetchContractTransactions("0x093D305366218D6d09bA10448922F10814b031dd")
+          .then(hashes => console.log("Fetched transaction hashes: ", hashes))
+          .catch(error => console.error(error));
       } catch (error) {
-        console.error('Error fetching meme tokens count:', error);
+        console.error('Error fetching tokens:', error);
       } finally {
         setLoading(false);
       }
@@ -53,8 +106,8 @@ const Dashboard: React.FC = () => {
     console.log('Searching for:', searchTerm);
   };
 
-  const navigateToTokenDetail = (card) => {
-    navigate(`/token-detail/${card.tokenAddress}`, { state: { card } });
+  const navigateToTokenDetail = (transaction: string) => {
+    navigate(`/token-detail/${transaction[0]}`, { state: { transaction } }); // Update as necessary
   };
 
   return (
@@ -89,19 +142,29 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-          {/* {cards.map((card) => (
-            // <PumpCard
-            //   key={card.tokenAddress}
-            //   ticker={card.symbol}
-            //   name={card.name}
-            //   description={card.description}
-            //   image={card.tokenImageUrl}
-            //   marketcap={parseFloat(card.fundingRaised)}
-            //   replies={47}
-            //   time='1h ago'
-            //   link='/'
-            // />
-          ))} */}
+        {decodedTransactions.map((transaction, index) => (
+            <PumpCard
+              key={index} // Use index or a unique identifier from the transaction if available
+              ticker={transaction.decodedData[1]} // Adjust based on your decoded data structure
+              name={transaction.decodedData[0]} // Adjust based on your decoded data structure
+              description={transaction.decodedData[2]} // Adjust based on your decoded data structure
+              image={transaction.decodedData[3]} // Adjust based on your decoded data structure
+              marketcap={1080456} // Placeholder, adjust as needed
+              replies={47} // Placeholder, adjust as needed
+              time='1h ago' // Placeholder, adjust as needed
+              link='/'
+            />
+          ))}
+          {/* <PumpCard
+              ticker='$MOODOGG'
+              name="Moo Dogg"
+              description='Tiny Dog, Big Drama: Meet Moo Dogg, our tiny, white Chihuahua known for her dramatic and adorable crying face'
+              image='https://via.placeholder.com/40'
+              marketcap={1080456}
+              replies={47}
+              time='1h ago'
+              link="/"
+          /> */}
         </div>
       </div>
     </Layout>
