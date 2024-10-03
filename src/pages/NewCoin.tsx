@@ -22,7 +22,7 @@ const NewCoin = () => {
 
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
-        const contractAddress = "0xF48883F2ae4C4bf4654f45997fE47D73daA4da07";
+        const contractAddress = "0x093D305366218D6d09bA10448922F10814b031dd ";
         const contract = new ethers.Contract(contractAddress, abi, signer);
 
         console.log("Got the Contract:" ,contract);
@@ -47,7 +47,7 @@ const NewCoin = () => {
     
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
-        const contractAddress = "0x093D305366218D6d09bA10448922F10814b031dd";
+        const contractAddress = "0x093D305366218D6d09bA10448922F10814b031dd ";
         const contract = new ethers.Contract(contractAddress, abi, signer);
     
         try {
@@ -87,7 +87,7 @@ const NewCoin = () => {
                         <input 
                             type="text" 
                             id="name" 
-                            className="w-full p-2 border border-gray-700 rounded bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            className="w-full p-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" 
                             value={name} 
                             onChange={(e) => {
                                 setName(e.target.value);
@@ -101,7 +101,7 @@ const NewCoin = () => {
                         <input 
                             type="text" 
                             id="ticker" 
-                            className="w-full p-2 border border-gray-700 rounded bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            className="w-full p-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" 
                             value={ticker} 
                             onChange={(e) => {
                                 setTicker(e.target.value);
@@ -114,7 +114,7 @@ const NewCoin = () => {
                         <label className="block mb-2 text-sm" htmlFor="description">Description</label>
                         <textarea 
                             id="description" 
-                            className="w-full p-2 border border-gray-700 rounded bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            className="w-full p-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" 
                             value={description} 
                             onChange={(e) => {
                                 setDescription(e.target.value);
@@ -133,7 +133,7 @@ const NewCoin = () => {
                         />
                     </div>
 
-                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    <button type="submit" className="w-full px-4 py-2 font-bold text-white bg-blue-600 rounded hover:bg-blue-700">
                         Create coin
                     </button>
                 </form>

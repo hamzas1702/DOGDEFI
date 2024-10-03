@@ -52,6 +52,8 @@ const Dashboard: React.FC = () => {
         chain: "11155111",
         transactionHash: transactionHash
       });
+      console.log("transactiondetails from the above hash are",transactionDetails)
+
       if (transactionDetails && transactionDetails.result) {
         const inputData = transactionDetails.jsonResponse.input;
 
@@ -62,7 +64,7 @@ const Dashboard: React.FC = () => {
 
         try {
           const decodedData = contractInterface.parseTransaction({ data: inputData });
-          console.log('Decoded data:', decodedData.args);
+          console.log('Decoded data.args from the transactionDetails.input:', decodedData.args);
           decodedTransactions.push({ decodedData: decodedData.args });
         } catch (decodeError) {
           console.error(`Error decoding data for transaction ${transactionHash} with input ${inputData}:`, decodeError);
