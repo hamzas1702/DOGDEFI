@@ -52,7 +52,6 @@ const Dashboard: React.FC = () => {
         chain: "11155111",
         transactionHash: transactionHash
       });
-
       if (transactionDetails && transactionDetails.result) {
         const inputData = transactionDetails.jsonResponse.input;
 
@@ -89,7 +88,7 @@ const Dashboard: React.FC = () => {
     const fetchMemeTokens = async () => {
       try {
 
-        fetchContractTransactions("0x093D305366218D6d09bA10448922F10814b031dd")
+        fetchContractTransactions("0x093D305366218D6d09bA10448922F10814b031dd")//address where the contract is deployed
           .then(hashes => console.log("Fetched transaction hashes: ", hashes))
           .catch(error => console.error(error));
       } catch (error) {
@@ -129,7 +128,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className='flex flex-wrap gap-4 justify-start items-center mb-10'>
+        <div className='flex flex-wrap items-center justify-start gap-4 mb-10'>
           <DropdownSort/>
           <div className={`${toggleAnimations ? 'bg-green-300 hover:bg-green-400' : 'bg-red-300 hover:bg-red-400'} inline-flex justify-between items-center rounded-md px-4 py-2 text-sm font-medium text-black shadow-sm focus:outline-none gap-2 hover:cursor-pointer`} onClick={() => setToggleAnimations(!toggleAnimations)}>
             {toggleAnimations ? <FaCheck /> : <RxCross2 />}
@@ -141,7 +140,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+        <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
         {decodedTransactions.map((transaction, index) => (
             <PumpCard
               key={index} // Use index or a unique identifier from the transaction if available
